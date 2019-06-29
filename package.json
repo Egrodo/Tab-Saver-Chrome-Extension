@@ -14,10 +14,7 @@
     "type": "git",
     "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
   },
-  "dependencies": {
-    "jquery": "~3.4.0",
-    "moment": "~2.24.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chrome": "~0.0.83",
     "@types/jquery": "~3.3.29",

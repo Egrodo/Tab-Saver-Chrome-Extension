@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+
+  "name": "Tab Saver",
+  "description": "One button click to save your current tab session offline for later restoring.",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_title": "Tab Saver"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["js/content_script.js"]
+    }
+  ],
+
+  "background": {
+    "scripts": ["js/background.js"]
+  },
+
+  "permissions": ["storage", "<all_urls>"]
+}
