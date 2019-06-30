@@ -1,0 +1,94 @@
+body,
+html {
+  height: 100%;
+  display: grid;
+}
+
+body {
+  background-color: black;
+  font-family: 'Arial';
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+content {
+  background-color: #3d3d3d;
+  color: whitesmoke;
+  border-radius: 5px;
+  margin: auto;
+  padding: 2rem;
+  width: 30rem;
+  min-height: 35rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+header > h1 {
+  font-size: 2.3em;
+  letter-spacing: 2px;
+  margin: 0 0 0.5rem 0;
+}
+
+header > h5 {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+ul {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li.tabItem {
+  width: 100%;
+  background-color: #c2c2c2;
+  padding: 0.5em 0;
+  display: inline-block;
+}
+
+.tabItem > .faviconBox {
+  float: left;
+  width: 32px;
+  height: 32px;
+  padding-left: 0.5em;
+  margin-right: 1em;
+}
+
+img.favicon {
+  width: 100%;
+  height: 100%;
+}
+
+.tabItem > .titleBox {
+  display: block;
+  color: black;
+}
+
+.title {
+  font-size: 1rem;
+  display: block;
+  text-decoration: none;
+}
+
+.title:visited {
+  color: inherit;
+}
+
+.url {
+  color: #525252;
+  font-size: 0.9rem;
+  display: block;
+  text-indent: 2em;
+}
+
+.title,
+.url {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}

@@ -71,4 +71,11 @@ function onBtnClick(): void {
   });
 }
 
-chrome.browserAction.onClicked.addListener(onBtnClick);
+function onMessage(msg): void {
+  console.log(msg);
+}
+
+const debouncedOnBtnClick = debounce(200, onBtnClick);
+
+chrome.runtime.onMessage.addListener(onMessage);
+chrome.browserAction.onClicked.addListener(debouncedOnBtnClick);
