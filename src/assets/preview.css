@@ -16,9 +16,10 @@ content {
   color: whitesmoke;
   border-radius: 5px;
   margin: auto;
+  position: relative;
   padding: 2rem;
   width: 30rem;
-  min-height: 35rem;
+  min-height: 40rem;
 }
 
 header {
@@ -39,6 +40,7 @@ header > h5 {
 
 ul {
   width: 100%;
+  max-width: 30rem;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -91,4 +93,13 @@ img.favicon {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  text-align: center;
 }

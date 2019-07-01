@@ -4,6 +4,7 @@
   "description": "One button click to save your current tab session offline for later restoring.",
   "main": "index.js",
   "scripts": {
+    "start": "npm run watch",
     "watch": "webpack --config webpack/webpack.dev.js --watch",
     "build": "webpack --config webpack/webpack.prod.js",
     "clean": "rimraf dist"
