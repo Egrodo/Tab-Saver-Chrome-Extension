@@ -16,6 +16,16 @@ class BtnHandler {
     previewTabId: null,
   };
 
+  updateBadgeCount = (count: number): void => {
+    if (count > 0) {
+      chrome.browserAction.setBadgeText({ text: count.toString() });
+      chrome.browserAction.setTitle({ title: `${count} tabs currently saved.` });
+    } else {
+      chrome.browserAction.setBadgeText({ text: '' });
+      chrome.browserAction.setTitle({ title: `Click to save your tabs!` });
+    }
+  };
+
   saveAndCloseTabs = (tabs: chrome.tabs.Tab[]): void => {
     // Filter out un-savable tabs
     const savableTabs = tabs.filter(tab => (tab.url && tab.title && !tab.incognito ? true : false));
@@ -28,6 +38,7 @@ class BtnHandler {
       // Open / highlight preview window before closing savableTabs.
       this.openPreviewWindow();
       this.closeAllTabs(savableTabs.map(tab => tab.id));
+      this.updateBadgeCount(savableTabs.length);
     } else {
       console.log('No tabs to save, doing nothing.');
     }
@@ -60,6 +71,8 @@ class BtnHandler {
       // If successfully restored (without throwing error) remove from storage
       chrome.storage.local.set({ savedTabs: [] });
       GlobalState.tabs = [];
+
+      this.updateBadgeCount(0);
     } catch (error) {
       console.error(error);
     }
