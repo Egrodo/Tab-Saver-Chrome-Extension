@@ -1,9 +1,8 @@
 import { ResponseData } from '../types';
 
-// TODO: Type this with lit-html types?
-const defaultFavicon = '#';
+const defaultFavicon = 'notFoundIcon.svg';
 
-const CreateTabItem = (tab: chrome.tabs.Tab): string => `
+const createTabItem = (tab: chrome.tabs.Tab): string => `
   <li class="tabItem">
     <div class="faviconBox">
       <img src="${tab.favIconUrl || defaultFavicon}" class="favicon" />
@@ -15,29 +14,27 @@ const CreateTabItem = (tab: chrome.tabs.Tab): string => `
   </li>
 `;
 
-// TODO: Rewrite with template tag https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
-window.addEventListener('load', () => {
+// NOTE: This is potentially vulnerable to XSS attacks if the local storage is compromised,
+// but since only this extension can access the local storage it shouldn't be a problem.
+const createTabList = (tabs: chrome.tabs.Tab[]): string =>
+  tabs.reduce((agg: string, tab) => agg + createTabItem(tab), '');
+
+function onMessage({ status, data: tabs }: ResponseData): void {
   const tabListUl = document.getElementById('tabList');
-
-  // Send message requesting tab list from background script
-  // TODO: Loading spinner until this returns
-  function createTabList(tabs: chrome.tabs.Tab[]): string {
-    // NOTE: This is potentially vulnerable to XSS attacks if the local storage is compromised. How to fix?
-    const TabList: string = tabs.reduce((agg: string, tab) => agg + CreateTabItem(tab), '');
-
-    return TabList;
+  console.log('message received');
+  if (status !== 'success') {
+    console.error('Failed to get tabs?');
+    return;
   }
 
-  function onMessage({ status, data }: ResponseData): void {
-    console.log('message received');
-    if (status !== 'success') {
-      console.error('Failed to get tabs?');
-      return;
-    }
+  const tabList = createTabList(tabs);
+  tabListUl.innerHTML = createTabList(tabs);
+  document.title = `Tab Saver - ${tabs.length} tabs saved`;
+  document.getElementById('count').innerText = `${tabs.length} tabs currently saved`;
+}
 
-    tabListUl.innerHTML = createTabList(data);
-  }
-
+window.addEventListener('load', () => {
+  // On load, request data and initialize listeners.
   chrome.runtime.sendMessage({ type: 'getTabs' });
   chrome.runtime.onMessage.addListener(onMessage);
 });

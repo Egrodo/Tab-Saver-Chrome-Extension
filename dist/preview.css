@@ -41,6 +41,9 @@ header > h5 {
 ul {
   width: 100%;
   max-width: 30rem;
+  max-height: 28rem;
+  overflow-y: scroll;
+  overflow-x: none;
   list-style: none;
   padding: 0;
   margin: 0;
