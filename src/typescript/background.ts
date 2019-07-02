@@ -7,24 +7,45 @@ import { debounce } from './helpers';
 //    If yes, save them, close them, open preview page.
 //    If no, ignore
 
-const GlobalState: GlobalState = {
-  tabs: [],
-};
+// TODO: Make this a setter and have a side effect of setting it be updating the badge
+const GlobalState: GlobalState = { tabs: [] };
+
+// On change of
+Object.defineProperty(GlobalState, 'tabs', {
+  set(tabs) {
+    this.value = tabs;
+
+    BtnHandler.updateBadge(tabs);
+  },
+  get() {
+    return this.value;
+  },
+});
 
 class BtnHandler {
   localState: BtnHandlerState = {
     previewTabId: null,
   };
 
-  updateBadgeCount = (count: number): void => {
-    if (count > 0) {
-      chrome.browserAction.setBadgeText({ text: count.toString() });
-      chrome.browserAction.setTitle({ title: `${count} tabs currently saved.` });
+  public static updateBadge(tabs: chrome.tabs.Tab[]) {
+    // On update of value, if there are tabs, set the tooltip to a preview of the domains.
+    if (tabs.length > 0) {
+      const domains: string[] = tabs.map(tab => tab.url.split('//')[1].split('/')[0]);
+      let domainDisplay: string = `${tabs.length} tabs currently saved:\n`;
+      // Display the first 5 domains in the tooltip.
+      for (let i = 0; i < (domains.length > 5 ? 5 : domains.length); ++i) {
+        // If we're on the last one, don't display the comma.
+        domainDisplay += i === (domains.length > 5 ? 4 : domains.length - 1) ? `${domains[i]}\n` : `${domains[i]},\n`;
+      }
+      if (domains.length > 5) domainDisplay += `and ${domains.length - 5} more.`;
+
+      chrome.browserAction.setBadgeText({ text: tabs.length.toString() });
+      chrome.browserAction.setTitle({ title: domainDisplay });
     } else {
       chrome.browserAction.setBadgeText({ text: '' });
       chrome.browserAction.setTitle({ title: `Click to save your tabs!` });
     }
-  };
+  }
 
   saveAndCloseTabs = (tabs: chrome.tabs.Tab[]): void => {
     // Filter out un-savable tabs
@@ -33,12 +54,13 @@ class BtnHandler {
     if (savableTabs.length) {
       console.log(`Saving ${savableTabs.length} tabs.`);
       chrome.storage.local.set({ savedTabs: savableTabs });
+
+      // Updating this value also updates the badge.
       GlobalState.tabs = savableTabs;
 
       // Open / highlight preview window before closing savableTabs.
       this.openPreviewWindow();
       this.closeAllTabs(savableTabs.map(tab => tab.id));
-      this.updateBadgeCount(savableTabs.length);
     } else {
       console.log('No tabs to save, doing nothing.');
     }
@@ -71,8 +93,6 @@ class BtnHandler {
       // If successfully restored (without throwing error) remove from storage
       chrome.storage.local.set({ savedTabs: [] });
       GlobalState.tabs = [];
-
-      this.updateBadgeCount(0);
     } catch (error) {
       console.error(error);
     }
