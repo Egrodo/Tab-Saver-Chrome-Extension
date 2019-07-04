@@ -11,4 +11,6 @@ Features include:
 - Gathers absolutely zero information on you and is completely open source
 - Super small extension, doesn't run in the background when not used, doesn't add any bloat to your browser.
 
-More features will be added as I think of them, suggestions welcome!
+[Download it here!](https://chrome.google.com/webstore/detail/tab-saver/bcolcolejgecmpoklbikgcecpmchnkhh)
+
+More features will be added as I think of them, suggestions welcome.
