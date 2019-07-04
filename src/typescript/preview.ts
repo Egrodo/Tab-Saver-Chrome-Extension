@@ -1,3 +1,4 @@
+const Trianglify = require('trianglify');
 import { ResponseData } from '../types';
 
 const defaultFavicon = 'notFoundIcon.svg';
@@ -8,7 +9,9 @@ const createTabItem = (tab: chrome.tabs.Tab): string => `
       <img src="${tab.favIconUrl || defaultFavicon}" class="favicon" />
     </div>
     <div class="titleBox">
-      <a href="${tab.url} class="title" target="_blank" rel="noreferral noopener">${tab.title}</a>
+      <a href="${tab.url}" class="title" target="_blank" rel="noreferral noopener" alt="${tab.title}" title="${
+  tab.title
+}">${tab.title}</a>
       <span class="url">${tab.url}</span>
     </div>
   </li>
@@ -19,6 +22,12 @@ const createTabItem = (tab: chrome.tabs.Tab): string => `
 const createTabList = (tabs: chrome.tabs.Tab[]): string =>
   tabs.reduce((agg: string, tab) => agg + createTabItem(tab), '');
 
+function generateBackground(): void {
+  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+  const pattern = Trianglify({ width: window.innerWidth, height: window.innerHeight });
+  pattern.canvas(canvas);
+}
+
 function onMessage({ status, data: tabs }: ResponseData): void {
   const tabListUl = document.getElementById('tabList');
   console.log('message received');
@@ -27,14 +36,16 @@ function onMessage({ status, data: tabs }: ResponseData): void {
     return;
   }
 
-  const tabList = createTabList(tabs);
   tabListUl.innerHTML = createTabList(tabs);
   document.title = `Tab Saver - ${tabs.length} tabs saved`;
   document.getElementById('count').innerText = `${tabs.length} tabs currently saved`;
+  document.getElementById('count').style.visibility = 'visible';
 }
 
 window.addEventListener('load', () => {
   // On load, request data and initialize listeners.
   chrome.runtime.sendMessage({ type: 'getTabs' });
   chrome.runtime.onMessage.addListener(onMessage);
+
+  generateBackground();
 });

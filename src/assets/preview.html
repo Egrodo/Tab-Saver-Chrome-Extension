@@ -10,12 +10,15 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
     />
     <link rel="stylesheet" type="text/css" href="preview.css" />
+    <script type="application/javascript" src="js/preview.js"></script>
   </head>
   <body>
+    <canvas id="canvas"></canvas>
     <content>
       <header>
+        <img src="./icon-128.png" />
         <h1>Tab Saver</h1>
-        <h5 id="count">N tabs currently saved</h5>
+        <h5 id="count" style="visibility: hidden">N tabs currently saved</h5>
       </header>
       <section class="tabContainer">
         <ul id="tabList"></ul>
@@ -33,13 +36,12 @@
         </h2>
         <h2>
           Made by
-          <a href="https://noahyamamoto.com" class="noahLink" target="_blank" rel="noreferral noopener"
-            >Noah Yamamoto
+          <a href="https://noahyamamoto.com" class="noahLink" target="_blank" rel="noreferral noopener">
+            Noah Yamamoto
           </a>
-          .
         </h2>
       </footer>
     </content>
   </body>
-  <script async type="application/javascript" src="js/preview.js"></script>
+  <script async type="application/javascript" src="js/vendor.js"></script>
 </html>
