@@ -7,7 +7,6 @@ import { debounce } from './helpers';
 //    If yes, save them, close them, open preview page.
 //    If no, ignore
 
-// TODO: Make this a setter and have a side effect of setting it be updating the badge
 const GlobalState: GlobalState = { tabs: [] };
 
 // On change of
@@ -66,7 +65,7 @@ class BtnHandler {
     }
   };
 
-  openPreviewWindow = (): void => {
+  public openPreviewWindow = (): void => {
     chrome.tabs.create(
       { url: chrome.runtime.getURL('preview.html'), active: true },
       ({ id }) => (this.localState.previewTabId = id),
@@ -140,5 +139,8 @@ const MessageHandlerRef = new MessageHandler();
 chrome.runtime.onMessage.addListener(MessageHandlerRef.onMessage);
 
 const BtnHandlerRef = new BtnHandler();
+
+// TODO: On startup open the preview page if there are tabs saved
+
 const debouncedClickHandler = debounce(200, BtnHandlerRef.handleBtnClick);
 chrome.browserAction.onClicked.addListener(debouncedClickHandler);

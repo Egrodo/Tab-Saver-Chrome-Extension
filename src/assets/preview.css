@@ -76,7 +76,8 @@ ul::-webkit-scrollbar {
 }
 
 ul::-webkit-scrollbar-thumb {
-  background-color: #fd6f71;
+  /* background-color: #fd6f71; */
+  background-color: black;
   border-radius: 15px;
 }
 
@@ -87,7 +88,7 @@ li.tabItem {
 }
 
 .tabItem > .faviconBox {
-  float: left;
+  display: inline-block;
   width: 32px;
   height: 32px;
   padding-left: 0.5em;
@@ -100,7 +101,8 @@ img.favicon {
 }
 
 .tabItem > .titleBox {
-  display: block;
+  display: inline-block;
+  width: 85%;
   color: black;
 }
 
@@ -115,10 +117,11 @@ img.favicon {
 }
 
 .url {
+  height: 100%;
   color: #525252;
   font-size: 0.9rem;
   display: block;
-  text-indent: 3rem;
+  text-indent: 1.5rem;
   cursor: copy;
   border: none;
   outline: none;

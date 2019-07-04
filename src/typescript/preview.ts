@@ -46,10 +46,10 @@ function onMessage({ status, data: tabs }: ResponseData): void {
   // On receiving message, create and render tab list, update tab counts, and add click handlers to url elements.
   tabListUl.innerHTML = createTabList(tabs);
   document.title = `Tab Saver - ${tabs.length} tabs saved`;
-  document.getElementById('count').innerText = `${tabs.length} tabs currently saved`;
+  document.getElementById('count').innerText = `${tabs.length} tab${tabs.length > 1 ? 's' : ''} currently saved`;
   document.getElementById('count').style.visibility = 'visible';
   document.querySelectorAll('.url').forEach((url: HTMLInputElement) => {
-    url.addEventListener('focus', () => this.select());
+    url.addEventListener('click', e => (e.currentTarget as HTMLInputElement).select());
   });
 }
 
