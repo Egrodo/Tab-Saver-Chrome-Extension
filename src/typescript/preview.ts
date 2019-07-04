@@ -3,16 +3,24 @@ import { ResponseData } from '../types';
 
 const defaultFavicon = 'notFoundIcon.svg';
 
+// TODO: When click on URL make editable, select it, and expand it.
 const createTabItem = (tab: chrome.tabs.Tab): string => `
   <li class="tabItem">
     <div class="faviconBox">
-      <img src="${tab.favIconUrl || defaultFavicon}" class="favicon" />
+      <img src="${tab.favIconUrl || defaultFavicon}" class="favicon" alt="favicon"/>
     </div>
     <div class="titleBox">
-      <a href="${tab.url}" class="title" target="_blank" rel="noreferral noopener" alt="${tab.title}" title="${
-  tab.title
-}">${tab.title}</a>
-      <span class="url">${tab.url}</span>
+      <a
+        href="${tab.url}"
+        class="title"
+        target="_blank"
+        rel="noreferral noopener"
+        alt="${tab.title}"
+        title="${tab.title}"
+      >
+        ${tab.title}
+      </a>
+      <input class="url" title="Click to select" alt="${tab.url}" value="${tab.url}" readonly />
     </div>
   </li>
 `;
@@ -30,16 +38,19 @@ function generateBackground(): void {
 
 function onMessage({ status, data: tabs }: ResponseData): void {
   const tabListUl = document.getElementById('tabList');
-  console.log('message received');
   if (status !== 'success') {
     console.error('Failed to get tabs?');
     return;
   }
 
+  // On receiving message, create and render tab list, update tab counts, and add click handlers to url elements.
   tabListUl.innerHTML = createTabList(tabs);
   document.title = `Tab Saver - ${tabs.length} tabs saved`;
   document.getElementById('count').innerText = `${tabs.length} tabs currently saved`;
   document.getElementById('count').style.visibility = 'visible';
+  document.querySelectorAll('.url').forEach((url: HTMLInputElement) => {
+    url.addEventListener('focus', () => this.select());
+  });
 }
 
 window.addEventListener('load', () => {

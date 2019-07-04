@@ -11,11 +11,11 @@ html {
   height: 100%;
   display: grid;
   position: relative;
+  font-family: 'Poppins', sans-serif;
 }
 
 body {
   background-color: white;
-  font-family: 'Arial'; /* TODO: */
   font-size: 16px;
   box-sizing: border-box;
 }
@@ -118,14 +118,21 @@ img.favicon {
   color: #525252;
   font-size: 0.9rem;
   display: block;
-  text-indent: 2em;
+  text-indent: 3rem;
+  cursor: copy;
+  border: none;
+  outline: none;
+  background: #efedee;
+  padding: 0;
+  margin: 0;
+  width: 98%;
 }
 
 .title,
 .url {
-  text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 footer {
@@ -139,9 +146,29 @@ footer {
 
 footer > h2 {
   font-size: 1rem;
+  color: black;
 }
 
-footer > h2 > a {
+.fancyLink {
+  position: relative;
+  text-decoration: none;
   color: black;
-  text-decoration: underline; /* TODO: Fancy hover underline stuff */
+}
+
+.fancyLink::before {
+  content: '';
+  position: absolute;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  background-color: black;
+  transform-origin: bottom left;
+  transform: scaleX(1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.fancyLink:hover::before {
+  transform: scaleX(0);
+  transform-origin: bottom right;
 }
