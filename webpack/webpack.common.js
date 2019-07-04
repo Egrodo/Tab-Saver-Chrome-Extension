@@ -7,7 +7,6 @@ module.exports = {
   entry: {
     preview: path.join(__dirname, srcDir + 'preview.ts'),
     background: path.join(__dirname, srcDir + 'background.ts'),
-    content_script: path.join(__dirname, srcDir + 'content_script.ts'),
   },
   output: {
     path: path.join(__dirname, '../dist/js'),

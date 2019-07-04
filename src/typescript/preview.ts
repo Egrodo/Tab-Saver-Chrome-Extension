@@ -46,7 +46,8 @@ function onMessage({ status, data: tabs }: ResponseData): void {
   // On receiving message, create and render tab list, update tab counts, and add click handlers to url elements.
   tabListUl.innerHTML = createTabList(tabs);
   document.title = `Tab Saver - ${tabs.length} tabs saved`;
-  document.getElementById('count').innerText = `${tabs.length} tab${tabs.length > 1 ? 's' : ''} currently saved`;
+  document.getElementById('count').innerText = `${tabs.length} tab${tabs.length > 1 ? 's' : ''} currently saved.`;
+  document.getElementById('plural').innerText = `Click the badge button to reopen ${tabs.length > 1 ? 'them' : 'it'}!`;
   document.getElementById('count').style.visibility = 'visible';
   document.querySelectorAll('.url').forEach((url: HTMLInputElement) => {
     url.addEventListener('click', e => (e.currentTarget as HTMLInputElement).select());

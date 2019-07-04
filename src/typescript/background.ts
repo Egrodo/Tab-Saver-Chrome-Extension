@@ -22,7 +22,7 @@ Object.defineProperty(GlobalState, 'tabs', {
 });
 
 class BtnHandler {
-  localState: BtnHandlerState = {
+  public localState: BtnHandlerState = {
     previewTabId: null,
   };
 
@@ -42,7 +42,7 @@ class BtnHandler {
       chrome.browserAction.setTitle({ title: domainDisplay });
     } else {
       chrome.browserAction.setBadgeText({ text: '' });
-      chrome.browserAction.setTitle({ title: `Click to save your tabs!` });
+      chrome.browserAction.setTitle({ title: `Click me to save your tabs!` });
     }
   }
 
@@ -140,7 +140,13 @@ chrome.runtime.onMessage.addListener(MessageHandlerRef.onMessage);
 
 const BtnHandlerRef = new BtnHandler();
 
-// TODO: On startup open the preview page if there are tabs saved
+// On startup, check for tabs in storage. If there are any, update state and open window.
+chrome.storage.local.get(['savedTabs'], (storage: Storage) => {
+  if (storage.savedTabs && storage.savedTabs.length) {
+    GlobalState.tabs = storage.savedTabs;
+    BtnHandlerRef.openPreviewWindow();
+  }
+});
 
 const debouncedClickHandler = debounce(200, BtnHandlerRef.handleBtnClick);
 chrome.browserAction.onClicked.addListener(debouncedClickHandler);
