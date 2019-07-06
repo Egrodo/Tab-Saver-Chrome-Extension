@@ -37,14 +37,17 @@ function generateBackground(): void {
 }
 
 function onMessage({ status, data: tabs }: ResponseData): void {
-  const tabListUl = document.getElementById('tabList');
+  const tabListContainer = document.getElementById('tabContainer');
+  const tabListUl = document.createElement('ul');
   if (status !== 'success') {
-    console.error('Failed to get tabs?');
+    console.error('Failed to get tabs.');
+    document.getElementById('plural').innerText = 'No currently saved tabs. Click the badge button to save your tabs!';
     return;
   }
 
   // On receiving message, create and render tab list, update tab counts, and add click handlers to url elements.
   tabListUl.innerHTML = createTabList(tabs);
+  tabListContainer.appendChild(tabListUl);
   document.title = `Tab Saver - ${tabs.length} tabs saved`;
   document.getElementById('count').innerText = `${tabs.length} tab${tabs.length > 1 ? 's' : ''} currently saved.`;
   document.getElementById('plural').innerText = `Click the badge button to reopen ${tabs.length > 1 ? 'them' : 'it'}!`;
