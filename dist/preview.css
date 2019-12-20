@@ -36,7 +36,7 @@ content {
   position: relative;
   padding: 2rem;
   width: 30rem;
-  min-height: 40rem;
+  max-height: 95vh;
   max-width: 100%;
   padding-bottom: 105px;
 }
@@ -93,6 +93,7 @@ li.tabItem {
   height: 32px;
   padding-left: 0.5em;
   margin-right: 1em;
+  cursor: pointer;
 }
 
 img.favicon {

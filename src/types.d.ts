@@ -1,3 +1,7 @@
+interface requestDataTypes {
+  
+}
+
 export interface GlobalState {
   tabs: chrome.tabs.Tab[];
 }
@@ -10,8 +14,9 @@ export interface Storage {
   savedTabs: chrome.tabs.Tab[];
 }
 
-export interface RequestType {
-  type: 'getTabs' | string;
+export interface RequestPackage {
+  type: 'getTabs' | 'removeTab' | string;
+  data?: string; // Currently this is only used for specifying a tab index to remove. Generalize in future if needed.
 }
 
 export interface ResponseData {

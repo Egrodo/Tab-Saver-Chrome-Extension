@@ -1,13 +1,15 @@
 const Trianglify = require('trianglify');
+import { debounce } from './helpers';
+
 import { ResponseData } from '../types';
 
 const defaultFavicon = 'notFoundIcon.svg';
 
-// TODO: When click on URL make editable, select it, and expand it.
+// TODO: When hover over the favicon, replace with a cross.
 const createTabItem = (tab: chrome.tabs.Tab): string => `
   <li class="tabItem">
-    <div class="faviconBox">
-      <img src="${tab.favIconUrl || defaultFavicon}" class="favicon" alt="favicon"/>
+    <div class="faviconBox" title="Click to remove from saved list">
+      <img src="${tab.favIconUrl || defaultFavicon}" class="favicon" alt="favicon" data-tab-index="${tab.index}"/>
     </div>
     <div class="titleBox">
       <a
@@ -36,6 +38,10 @@ function generateBackground(): void {
   pattern.canvas(canvas);
 }
 
+function removeSavedTab(tabIndex: string): void {
+  chrome.runtime.sendMessage({ type: 'removeTab', data: tabIndex });
+}
+
 function onMessage({ status, data: tabs }: ResponseData): void {
   const tabListContainer = document.getElementById('tabContainer');
   const tabListUl = document.createElement('ul');
@@ -43,6 +49,11 @@ function onMessage({ status, data: tabs }: ResponseData): void {
     console.error('Failed to get tabs.');
     document.getElementById('plural').innerText = 'No currently saved tabs. Click the badge button to save your tabs!';
     return;
+  }
+
+  // On receiving message, first remove whatever content was already there, if any
+  if (tabListContainer.firstChild) {
+    tabListContainer.firstChild.remove();
   }
 
   // On receiving message, create and render tab list, update tab counts, and add click handlers to url elements.
@@ -55,6 +66,9 @@ function onMessage({ status, data: tabs }: ResponseData): void {
   document.querySelectorAll('.url').forEach((url: HTMLInputElement) => {
     url.addEventListener('click', e => (e.currentTarget as HTMLInputElement).select());
   });
+  document.querySelectorAll('.favicon').forEach((favicon: HTMLImageElement) => {
+    favicon.addEventListener('click', e => removeSavedTab((e.currentTarget as HTMLImageElement).dataset.tabIndex));
+  });
 }
 
 window.addEventListener('load', () => {
@@ -64,3 +78,14 @@ window.addEventListener('load', () => {
 
   generateBackground();
 });
+
+function resizeCanvas(): void {
+  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+  const pattern = Trianglify({ width: window.innerWidth, height: window.innerHeight });
+  pattern.canvas(canvas);
+}
+
+const debouncedResize = debounce(150, resizeCanvas)
+
+// On resize, debounce and update the background canvas.
+window.addEventListener('resize', debouncedResize);

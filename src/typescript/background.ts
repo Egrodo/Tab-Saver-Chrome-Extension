@@ -1,4 +1,4 @@
-import { GlobalState, BtnHandlerState, Storage, RequestType, ResponseData } from '../types';
+import { GlobalState, BtnHandlerState, Storage, RequestPackage, ResponseData } from '../types';
 import { debounce } from './helpers';
 
 // On button click, check if there are savedTabs.
@@ -13,7 +13,7 @@ const GlobalState: GlobalState = { tabs: [] };
 Object.defineProperty(GlobalState, 'tabs', {
   set(tabs) {
     this.value = tabs;
-
+    console.log(tabs);
     BtnHandler.updateBadge(tabs);
   },
   get() {
@@ -117,7 +117,7 @@ class MessageHandler {
     chrome.tabs.sendMessage(this.tabId, data);
   };
 
-  onMessage = ({ type }: RequestType, sender: chrome.runtime.MessageSender): void => {
+  onMessage = ({ type, data }: RequestPackage, sender: chrome.runtime.MessageSender): void => {
     this.tabId = sender.tab.id;
     switch (type) {
       case 'getTabs':
@@ -126,6 +126,18 @@ class MessageHandler {
           this.sendResponse({ status: 'failure', data: [] });
           return;
         }
+
+        this.sendResponse({ status: 'success', data: GlobalState.tabs });
+        break;
+      case 'removeTab':
+        if (data === undefined) {
+          console.error('Tab removal request recieved but no tab included to remove');
+          this.sendResponse({ status: 'failure', data: []});
+          return;
+        }
+        console.log(`Removing tab index ${data}.`);
+        const newTabs: chrome.tabs.Tab[] = GlobalState.tabs.filter((_, i) => i !== Number.parseInt(data));
+        GlobalState.tabs = newTabs;
 
         this.sendResponse({ status: 'success', data: GlobalState.tabs });
         break;
