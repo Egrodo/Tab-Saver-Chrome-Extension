@@ -3,13 +3,14 @@ import { debounce } from './helpers';
 
 import { ResponseData } from '../types';
 
+const closeButton = 'closeBtn.png';
 const defaultFavicon = 'notFoundIcon.svg';
 
 // TODO: When hover over the favicon, replace with a cross.
 const createTabItem = (tab: chrome.tabs.Tab): string => `
   <li class="tabItem">
     <div class="faviconBox" title="Click to remove from saved list">
-      <img src="${tab.favIconUrl || defaultFavicon}" class="favicon" alt="favicon" data-tab-index="${tab.index}"/>
+      <img src="${tab.favIconUrl || defaultFavicon}" class="favicon" alt="favicon" data-tab-id="${tab.id}" data-favicon-url="${tab.favIconUrl || defaultFavicon}"/>
     </div>
     <div class="titleBox">
       <a
@@ -38,13 +39,18 @@ function generateBackground(): void {
   pattern.canvas(canvas);
 }
 
-function removeSavedTab(tabIndex: string): void {
-  chrome.runtime.sendMessage({ type: 'removeTab', data: tabIndex });
+function resizeBackground(): void {
+  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+  const pattern = Trianglify({ width: window.innerWidth, height: window.innerHeight });
+  pattern.canvas(canvas);
+}
+
+function removeSavedTab(tabId: string): void {
+  chrome.runtime.sendMessage({ type: 'removeTab', data: tabId });
 }
 
 function onMessage({ status, data: tabs }: ResponseData): void {
-  const tabListContainer = document.getElementById('tabContainer');
-  const tabListUl = document.createElement('ul');
+  const tabContainer = document.getElementById('tabContainer');
   if (status !== 'success') {
     console.error('Failed to get tabs.');
     document.getElementById('plural').innerText = 'No currently saved tabs. Click the badge button to save your tabs!';
@@ -52,13 +58,12 @@ function onMessage({ status, data: tabs }: ResponseData): void {
   }
 
   // On receiving message, first remove whatever content was already there, if any
-  if (tabListContainer.firstChild) {
-    tabListContainer.firstChild.remove();
+  if (tabContainer.innerHTML) {
+    tabContainer.innerHTML = '';
   }
 
   // On receiving message, create and render tab list, update tab counts, and add click handlers to url elements.
-  tabListUl.innerHTML = createTabList(tabs);
-  tabListContainer.appendChild(tabListUl);
+  tabContainer.innerHTML = createTabList(tabs);
   document.title = `Tab Saver - ${tabs.length} tabs saved`;
   document.getElementById('count').innerText = `${tabs.length} tab${tabs.length > 1 ? 's' : ''} currently saved.`;
   document.getElementById('plural').innerText = `Click the badge button to reopen ${tabs.length > 1 ? 'them' : 'it'}!`;
@@ -67,7 +72,15 @@ function onMessage({ status, data: tabs }: ResponseData): void {
     url.addEventListener('click', e => (e.currentTarget as HTMLInputElement).select());
   });
   document.querySelectorAll('.favicon').forEach((favicon: HTMLImageElement) => {
-    favicon.addEventListener('click', e => removeSavedTab((e.currentTarget as HTMLImageElement).dataset.tabIndex));
+    // Indicate to the user that clicking the favicon will result in that item being removed from the saved list
+    favicon.addEventListener('mouseover', e => {
+      (e.currentTarget as HTMLImageElement).src = closeButton;
+    });
+    favicon.addEventListener('mouseout', e => {
+      const originalFavicon = (e.currentTarget as HTMLImageElement).dataset.faviconUrl;
+      (e.currentTarget as HTMLImageElement).src = originalFavicon;
+    });
+    favicon.addEventListener('click', e => removeSavedTab((e.currentTarget as HTMLImageElement).dataset.tabId));
   });
 }
 
@@ -79,13 +92,5 @@ window.addEventListener('load', () => {
   generateBackground();
 });
 
-function resizeCanvas(): void {
-  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-  const pattern = Trianglify({ width: window.innerWidth, height: window.innerHeight });
-  pattern.canvas(canvas);
-}
-
-const debouncedResize = debounce(150, resizeCanvas)
-
 // On resize, debounce and update the background canvas.
-window.addEventListener('resize', debouncedResize);
+window.addEventListener('resize', resizeBackground);

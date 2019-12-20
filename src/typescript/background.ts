@@ -13,7 +13,7 @@ const GlobalState: GlobalState = { tabs: [] };
 Object.defineProperty(GlobalState, 'tabs', {
   set(tabs) {
     this.value = tabs;
-    console.log(tabs);
+    chrome.storage.local.set({ savedTabs: tabs });
     BtnHandler.updateBadge(tabs);
   },
   get() {
@@ -52,7 +52,6 @@ class BtnHandler {
 
     if (savableTabs.length) {
       console.log(`Saving ${savableTabs.length} tabs.`);
-      chrome.storage.local.set({ savedTabs: savableTabs });
 
       // Updating this value also updates the badge.
       GlobalState.tabs = savableTabs;
@@ -90,7 +89,6 @@ class BtnHandler {
       tabs.forEach(({ url, active }) => chrome.tabs.create({ url, active }));
 
       // If successfully restored (without throwing error) remove from storage
-      chrome.storage.local.set({ savedTabs: [] });
       GlobalState.tabs = [];
     } catch (error) {
       console.error(error);
@@ -136,7 +134,7 @@ class MessageHandler {
           return;
         }
         console.log(`Removing tab index ${data}.`);
-        const newTabs: chrome.tabs.Tab[] = GlobalState.tabs.filter((_, i) => i !== Number.parseInt(data));
+        const newTabs: chrome.tabs.Tab[] = GlobalState.tabs.filter(({id}) => id !== Number.parseInt(data));
         GlobalState.tabs = newTabs;
 
         this.sendResponse({ status: 'success', data: GlobalState.tabs });

@@ -8,7 +8,7 @@
 
 body,
 html {
-  height: 100%;
+  height: 100vh;
   display: grid;
   position: relative;
   font-family: 'Poppins', sans-serif;
@@ -29,6 +29,8 @@ canvas {
 }
 
 content {
+  display: flex;
+  flex-direction: column;
   background-color: rgba(255, 255, 255, 0.5);
   color: black;
   border-radius: 5px;
@@ -36,14 +38,18 @@ content {
   position: relative;
   padding: 2rem;
   width: 30rem;
-  max-height: 95vh;
+  max-height: 94vh;
   max-width: 100%;
-  padding-bottom: 105px;
 }
 
 header {
   text-align: center;
   margin-bottom: 2rem;
+}
+
+header > img {
+  height: 5rem;
+  width: 5rem;
 }
 
 header > h1 {
@@ -59,8 +65,9 @@ header > h5 {
 
 ul {
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 3.65rem;
   max-width: 30rem;
-  max-height: 20rem;
   overflow-y: scroll;
   overflow-x: hidden;
   list-style: none;
@@ -140,10 +147,8 @@ img.favicon {
 }
 
 footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex-shrink: 0;
+  margin-top: auto;
   padding: 1rem;
   text-align: center;
 }
