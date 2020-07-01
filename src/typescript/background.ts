@@ -1,4 +1,10 @@
-import { GlobalState, BtnHandlerState, Storage, RequestPackage, ResponseData } from '../types';
+import {
+  GlobalState,
+  BtnHandlerState,
+  Storage,
+  RequestPackage,
+  ResponseData,
+} from '../types';
 import { debounce } from './helpers';
 
 // On button click, check if there are savedTabs.
@@ -22,21 +28,27 @@ Object.defineProperty(GlobalState, 'tabs', {
 });
 
 class BtnHandler {
-  public localState: BtnHandlerState = {
+  private localState: BtnHandlerState = {
     previewTabId: null,
   };
 
   public static updateBadge(tabs: chrome.tabs.Tab[]) {
     // On update of value, if there are tabs, set the tooltip to a preview of the domains.
     if (tabs.length > 0) {
-      const domains: string[] = tabs.map(tab => tab.url.split('//')[1].split('/')[0]);
+      const domains: string[] = tabs.map(
+        (tab) => tab.url.split('//')[1].split('/')[0]
+      );
       let domainDisplay: string = `${tabs.length} tabs currently saved:\n`;
       // Display the first 5 domains in the tooltip.
       for (let i = 0; i < (domains.length > 5 ? 5 : domains.length); ++i) {
         // If we're on the last one, don't display the comma.
-        domainDisplay += i === (domains.length > 5 ? 4 : domains.length - 1) ? `${domains[i]}\n` : `${domains[i]},\n`;
+        domainDisplay +=
+          i === (domains.length > 5 ? 4 : domains.length - 1)
+            ? `${domains[i]}\n`
+            : `${domains[i]},\n`;
       }
-      if (domains.length > 5) domainDisplay += `and ${domains.length - 5} more.`;
+      if (domains.length > 5)
+        domainDisplay += `and ${domains.length - 5} more.`;
 
       chrome.browserAction.setBadgeText({ text: tabs.length.toString() });
       chrome.browserAction.setTitle({ title: domainDisplay });
@@ -48,7 +60,9 @@ class BtnHandler {
 
   saveAndCloseTabs = (tabs: chrome.tabs.Tab[]): void => {
     // Filter out un-savable tabs
-    const savableTabs = tabs.filter(tab => (tab.url && tab.title && !tab.incognito ? true : false));
+    const savableTabs = tabs.filter((tab) =>
+      tab.url && tab.title && !tab.incognito ? true : false
+    );
 
     if (savableTabs.length) {
       console.log(`Saving ${savableTabs.length} tabs.`);
@@ -58,7 +72,7 @@ class BtnHandler {
 
       // Open / highlight preview window before closing savableTabs.
       this.openPreviewWindow();
-      this.closeAllTabs(savableTabs.map(tab => tab.id));
+      this.closeAllTabs(savableTabs.map((tab) => tab.id));
     } else {
       console.log('No tabs to save, doing nothing.');
     }
@@ -67,7 +81,7 @@ class BtnHandler {
   public openPreviewWindow = (): void => {
     chrome.tabs.create(
       { url: chrome.runtime.getURL('preview.html'), active: true },
-      ({ id }) => (this.localState.previewTabId = id),
+      ({ id }) => (this.localState.previewTabId = id)
     );
   };
 
@@ -115,7 +129,10 @@ class MessageHandler {
     chrome.tabs.sendMessage(this.tabId, data);
   };
 
-  onMessage = ({ type, data }: RequestPackage, sender: chrome.runtime.MessageSender): void => {
+  onMessage = (
+    { type, data }: RequestPackage,
+    sender: chrome.runtime.MessageSender
+  ): void => {
     this.tabId = sender.tab.id;
     switch (type) {
       case 'getTabs':
@@ -129,18 +146,24 @@ class MessageHandler {
         break;
       case 'removeTab':
         if (data === undefined) {
-          console.error('Tab removal request recieved but no tab included to remove');
-          this.sendResponse({ status: 'failure', data: []});
+          console.error(
+            'Tab removal request recieved but no tab included to remove'
+          );
+          this.sendResponse({ status: 'failure', data: [] });
           return;
         }
         console.log(`Removing tab index ${data}.`);
-        const newTabs: chrome.tabs.Tab[] = GlobalState.tabs.filter(({id}) => id !== Number.parseInt(data));
+        const newTabs: chrome.tabs.Tab[] = GlobalState.tabs.filter(
+          ({ id }) => id !== Number.parseInt(data)
+        );
         GlobalState.tabs = newTabs;
 
         this.sendResponse({ status: 'success', data: GlobalState.tabs });
         break;
       default:
-        console.error(`Invalid request type sent to background script: ${type}`);
+        console.error(
+          `Invalid request type sent to background script: ${type}`
+        );
     }
   };
 }
@@ -156,6 +179,16 @@ chrome.storage.local.get(['savedTabs'], (storage: Storage) => {
     GlobalState.tabs = storage.savedTabs;
     BtnHandlerRef.openPreviewWindow();
   }
+});
+
+// On startup, create context menu on right clicking the badge for saved tab removal
+chrome.contextMenus.create({
+  title: 'Remove all saved tabs',
+  contexts: ['browser_action'],
+  onclick: () => {
+    GlobalState.tabs = [];
+    this.sendResponse({ status: 'success', data: GlobalState.tabs });
+  },
 });
 
 const debouncedClickHandler = debounce(200, BtnHandlerRef.handleBtnClick);
