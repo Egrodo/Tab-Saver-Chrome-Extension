@@ -1,3 +1,5 @@
+import { browser } from 'webextension-polyfill';
+
 import {
   GlobalState,
   BtnHandlerState,
@@ -19,7 +21,7 @@ const GlobalState: GlobalState = { tabs: [] };
 Object.defineProperty(GlobalState, 'tabs', {
   set(tabs) {
     this.value = tabs;
-    chrome.storage.local.set({ savedTabs: tabs });
+    browser.storage.local.set({ savedTabs: tabs });
     BtnHandler.updateBadge(tabs);
   },
   get() {
@@ -32,7 +34,7 @@ class BtnHandler {
     previewTabId: null,
   };
 
-  public static updateBadge(tabs: chrome.tabs.Tab[]) {
+  public static updateBadge(tabs: browser.tabs.Tab[]) {
     // On update of value, if there are tabs, set the tooltip to a preview of the domains.
     if (tabs.length > 0) {
       const domains: string[] = tabs.map(
@@ -50,15 +52,15 @@ class BtnHandler {
       if (domains.length > 5)
         domainDisplay += `and ${domains.length - 5} more.`;
 
-      chrome.browserAction.setBadgeText({ text: tabs.length.toString() });
-      chrome.browserAction.setTitle({ title: domainDisplay });
+      browser.browserAction.setBadgeText({ text: tabs.length.toString() });
+      browser.browserAction.setTitle({ title: domainDisplay });
     } else {
-      chrome.browserAction.setBadgeText({ text: '' });
-      chrome.browserAction.setTitle({ title: `Click me to save your tabs!` });
+      browser.browserAction.setBadgeText({ text: '' });
+      browser.browserAction.setTitle({ title: `Click me to save your tabs!` });
     }
   }
 
-  saveAndCloseTabs = (tabs: chrome.tabs.Tab[]): void => {
+  saveAndCloseTabs = (tabs: browser.tabs.Tab[]): void => {
     // Filter out un-savable tabs
     const savableTabs = tabs.filter((tab) =>
       tab.url && tab.title && !tab.incognito ? true : false
@@ -79,28 +81,28 @@ class BtnHandler {
   };
 
   public openPreviewWindow = (): void => {
-    chrome.tabs.create(
-      { url: chrome.runtime.getURL('preview.html'), active: true },
+    browser.tabs.create(
+      { url: browser.runtime.getURL('preview.html'), active: true },
       ({ id }) => (this.localState.previewTabId = id)
     );
   };
 
   closePreviewWindow = (): void => {
     if (this.localState.previewTabId) {
-      chrome.tabs.remove(this.localState.previewTabId);
+      browser.tabs.remove(this.localState.previewTabId);
       this.localState.previewTabId = null;
     }
   };
 
   closeAllTabs = (ids: number[]): void => {
     console.log(`Closing ${ids.length} tabs.`);
-    chrome.tabs.remove(ids);
+    browser.tabs.remove(ids);
   };
 
-  restoreAllTabs = (tabs: chrome.tabs.Tab[]): void => {
+  restoreAllTabs = (tabs: browser.tabs.Tab[]): void => {
     console.log(`Restoring ${tabs.length} tabs.`);
     try {
-      tabs.forEach(({ url, active }) => chrome.tabs.create({ url, active }));
+      tabs.forEach(({ url, active }) => browser.tabs.create({ url, active }));
 
       // If successfully restored (without throwing error) remove from storage
       GlobalState.tabs = [];
@@ -110,13 +112,13 @@ class BtnHandler {
   };
 
   handleBtnClick = (): void => {
-    chrome.storage.local.get(['savedTabs'], (storage: Storage) => {
+    browser.storage.local.get(['savedTabs'], (storage: Storage) => {
       // If there are tabs saved, restore them. Otherwise save and close the current tabs.
       if (storage.savedTabs && storage.savedTabs.length) {
         this.restoreAllTabs(storage.savedTabs);
         this.closePreviewWindow();
       } else {
-        chrome.tabs.query({ currentWindow: true }, this.saveAndCloseTabs);
+        browser.tabs.query({ currentWindow: true }, this.saveAndCloseTabs);
       }
     });
   };
@@ -126,12 +128,12 @@ class MessageHandler {
   tabId: number | null = null;
 
   sendResponse = (data: ResponseData): void => {
-    chrome.tabs.sendMessage(this.tabId, data);
+    browser.tabs.sendMessage(this.tabId, data);
   };
 
   onMessage = (
     { type, data }: RequestPackage,
-    sender: chrome.runtime.MessageSender
+    sender: browser.runtime.MessageSender
   ): void => {
     this.tabId = sender.tab.id;
     switch (type) {
@@ -153,7 +155,7 @@ class MessageHandler {
           return;
         }
         console.log(`Removing tab index ${data}.`);
-        const newTabs: chrome.tabs.Tab[] = GlobalState.tabs.filter(
+        const newTabs: browser.tabs.Tab[] = GlobalState.tabs.filter(
           ({ id }) => id !== Number.parseInt(data)
         );
         GlobalState.tabs = newTabs;
@@ -169,12 +171,12 @@ class MessageHandler {
 }
 
 const MessageHandlerRef = new MessageHandler();
-chrome.runtime.onMessage.addListener(MessageHandlerRef.onMessage);
+browser.runtime.onMessage.addListener(MessageHandlerRef.onMessage);
 
 const BtnHandlerRef = new BtnHandler();
 
 // On startup, check for tabs in storage. If there are any, update state and open window.
-chrome.storage.local.get(['savedTabs'], (storage: Storage) => {
+browser.storage.local.get(['savedTabs'], (storage: Storage) => {
   if (storage.savedTabs && storage.savedTabs.length) {
     GlobalState.tabs = storage.savedTabs;
     BtnHandlerRef.openPreviewWindow();
@@ -182,7 +184,7 @@ chrome.storage.local.get(['savedTabs'], (storage: Storage) => {
 });
 
 // On startup, create context menu on right clicking the badge for saved tab removal
-chrome.contextMenus.create({
+browser.contextMenus.create({
   title: 'Remove all saved tabs',
   contexts: ['browser_action'],
   onclick: () => {
@@ -192,4 +194,4 @@ chrome.contextMenus.create({
 });
 
 const debouncedClickHandler = debounce(200, BtnHandlerRef.handleBtnClick);
-chrome.browserAction.onClicked.addListener(debouncedClickHandler);
+browser.browserAction.onClicked.addListener(debouncedClickHandler);

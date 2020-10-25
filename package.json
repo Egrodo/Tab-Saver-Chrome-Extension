@@ -17,12 +17,13 @@
   },
   "dependencies": {
     "@types/node": "^12.12.47",
-    "trianglify": "^2.0.0"
+    "trianglify": "^2.0.0",
+    "webextension-polyfill": "^0.6.0"
   },
   "devDependencies": {
     "@types/chrome": "0.0.117",
     "@types/jquery": "^3.5.0",
-    "copy-webpack-plugin": "^5.1.1",
+    "copy-webpack-plugin": "^5.1.2",
     "rimraf": "^2.7.1",
     "ts-loader": "~5.4.3",
     "typescript": "~3.4.5",
